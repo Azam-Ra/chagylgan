@@ -10,8 +10,8 @@ The keywords of the language can contain 36 lowercase letters of Kyrgyz alphabet
 ## Syntax
 There is a list of reserved words, or keywords of the language, the members of which cannot be used as ordinary identifiers:
 ```
-буул, чын, калп, эгер, же эгер, же, сан,
-чейин, тамсаб, ар бир, ичиндеги.
+буул, чын, калп, эгер, же эгер, же, сан, таксан,
+чейин, тамсаб, ар бир, ичиндеги, кайтар.
 ```
 
 ## Examples
