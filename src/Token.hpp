@@ -9,10 +9,10 @@ enum class TokenKind {
     LeftParen,
     RightParen,
     Chygar,
-}
+};
 
 struct Token {
     TokenKind kind;
     std::string value;
-}
+};
 
