@@ -3,7 +3,6 @@
 #include <string>
 
 enum class TokenKind {
-    Invalid,
     End,
     String,
     LeftParen,

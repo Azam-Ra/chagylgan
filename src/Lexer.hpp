@@ -1,30 +1,32 @@
 #pragma once
 
+#include <expected>
 #include <string>
 
 #include <utf8.h>
 
+#include "Error.hpp"
 #include "Token.hpp"
 
 class Lexer {
 public:
   explicit Lexer(std::string text) : text_(std::move(text)) {}
 
-  Token nextToken() {
+  std::expected<Token, Diagnostic> nextToken() {
     if (pos_ >= text_.size())
-      return {TokenKind::End, ""};
+      return Token(TokenKind::End, "");
 
     char32_t t = advance();
     if (t == '(') {
-      return {TokenKind::LeftParen, ""};
+      return Token(TokenKind::LeftParen, "");
     } else if (t == ')') {
-      return {TokenKind::RightParen, ""};
+      return Token(TokenKind::RightParen, "");
     } else if (t == '"') {
       return obtain_string_token();
     } else if (is_kyrgyz_char(t)) {
       return obtain_keyword_token();
     } else {
-      return {TokenKind::Invalid, ""};
+      return std::unexpected(Diagnostic({pos_}, "Lexer: Non-valid char"));
     }
   }
 
@@ -47,23 +49,25 @@ private:
     return code_point;
   }
 
-  Token obtain_string_token() {
+  std::expected<Token, Diagnostic> obtain_string_token() {
     auto cursor = text_.cbegin() + pos_;
     size_t start_pos = static_cast<std::size_t>(cursor - text_.cbegin());
 
     while (!at_end()) {
       char32_t code_point = advance();
       if (code_point == '"') {
+        // TODO: if " written in Cyrillic, then -1 might not offset correctly
         // -1 because we know that prev char is "
-        return {TokenKind::String,
-                text_.substr(start_pos, pos_ - start_pos - 1)};
+        return Token(TokenKind::String,
+                     text_.substr(start_pos, pos_ - start_pos - 1));
       }
     }
 
-    return {TokenKind::Invalid, ""};
+    return std::unexpected(
+        Diagnostic({start_pos, pos_}, "Lexer: Non terminated string"));
   }
 
-  Token obtain_keyword_token() {
+  std::expected<Token, Diagnostic> obtain_keyword_token() {
     auto cursor = text_.cbegin() + pos_;
     utf8::prior(cursor,
                 text_.cbegin()); // restore 1st char processed by advance()
@@ -72,14 +76,16 @@ private:
     while (is_kyrgyz_char(peek()) && !at_end()) {
       advance();
     }
-    return verified_keyword_token(text_.substr(start_pos, pos_ - start_pos));
+    return verified_keyword_token(text_.substr(start_pos, pos_ - start_pos), start_pos);
   }
 
-  Token verified_keyword_token(std::string keyword) {
+  std::expected<Token, Diagnostic> verified_keyword_token(std::string keyword,
+                                                          size_t start_pos) {
     if (keyword == "чыгар") {
-      return {TokenKind::Chygar, ""};
+      return Token(TokenKind::Chygar, "");
     } else {
-      return {TokenKind::Invalid, ""};
+      return std::unexpected(
+          Diagnostic({start_pos, pos_}, "Lexer: Non-valid keyword statement"));
     }
   }
 
