@@ -1,2 +1,6 @@
 CompileFlags:
   CompilationDatabase: build/Release
+
+Diagnostics:
+  ClangTidy:
+    Add: performance-move-const-arg
