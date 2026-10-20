@@ -5,8 +5,8 @@
 
 #include <utf8.h>
 
-#include "Error.hpp"
 #include "Token.hpp"
+#include "Diagnostic.hpp"
 
 class Lexer {
 public:
@@ -29,6 +29,8 @@ public:
       return std::unexpected(Diagnostic({pos_}, "Lexer: Non-valid char"));
     }
   }
+
+  std::size_t get_pos_() const { return pos_; }
 
 private:
   size_t pos_ = 0;
@@ -76,7 +78,8 @@ private:
     while (is_kyrgyz_char(peek()) && !at_end()) {
       advance();
     }
-    return verified_keyword_token(text_.substr(start_pos, pos_ - start_pos), start_pos);
+    return verified_keyword_token(text_.substr(start_pos, pos_ - start_pos),
+                                  start_pos);
   }
 
   std::expected<Token, Diagnostic> verified_keyword_token(std::string keyword,
